@@ -59,7 +59,7 @@ public class RedisClusterRule extends ExternalResource {
 	 * @see org.junit.rules.ExternalResource#before()
 	 */
 	@Override
-	protected void before() throws Throwable {
+	public void before() {
 		Assume.assumeThat(mode, is("cluster"));
 	}
 

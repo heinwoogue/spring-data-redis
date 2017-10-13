@@ -16,6 +16,7 @@
 package org.springframework.data.redis.connection.lettuce;
 
 import io.lettuce.core.ClientOptions;
+import io.lettuce.core.ReadFrom;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.resource.ClientResources;
 
@@ -37,6 +38,7 @@ import org.springframework.util.Assert;
  * <li>Whether to use StartTLS</li>
  * <li>Optional {@link ClientResources}</li>
  * <li>Optional {@link ClientOptions}</li>
+ * <li>Optional {@link ReadFrom}. Enables Master/Slave operations if configured.</li>
  * <li>Client {@link Duration timeout}</li>
  * <li>Shutdown {@link Duration timeout}</li>
  * </ul>
@@ -76,6 +78,11 @@ public interface LettuceClientConfiguration {
 	Optional<ClientOptions> getClientOptions();
 
 	/**
+	 * @return the optional {@link io.lettuce.core.ReadFrom} setting.
+	 */
+	Optional<ReadFrom> getReadFrom();
+
+	/**
 	 * @return the timeout.
 	 */
 	Duration getCommandTimeout();
@@ -109,6 +116,8 @@ public interface LettuceClientConfiguration {
 	 * <dd>none</dd>
 	 * <dt>Client Resources</dt>
 	 * <dd>none</dd>
+	 * <dt>Read From</dt>
+	 * <dd>none</dd>
 	 * <dt>Connect Timeout</dt>
 	 * <dd>60 Seconds</dd>
 	 * <dt>Shutdown Timeout</dt>
@@ -132,6 +141,7 @@ public interface LettuceClientConfiguration {
 		boolean startTls;
 		@Nullable ClientResources clientResources;
 		@Nullable ClientOptions clientOptions;
+		@Nullable ReadFrom readFrom;
 		Duration timeout = Duration.ofSeconds(RedisURI.DEFAULT_TIMEOUT);
 		Duration shutdownTimeout = Duration.ofMillis(100);
 
@@ -179,6 +189,22 @@ public interface LettuceClientConfiguration {
 		}
 
 		/**
+		 * Configure {@link ReadFrom}. Enables Master/Slave operations if configured.
+		 *
+		 * @param readFrom must not be {@literal null}.
+		 * @return {@literal this} builder.
+		 * @throws IllegalArgumentException if clientOptions is {@literal null}.
+		 * @since 2.1
+		 */
+		public LettuceClientConfigurationBuilder readFrom(ReadFrom readFrom) {
+
+			Assert.notNull(readFrom, "ReadFrom must not be null!");
+
+			this.readFrom = readFrom;
+			return this;
+		}
+
+		/**
 		 * Configure a command timeout.
 		 *
 		 * @param timeout must not be {@literal null}.
@@ -216,7 +242,7 @@ public interface LettuceClientConfiguration {
 		public LettuceClientConfiguration build() {
 
 			return new DefaultLettuceClientConfiguration(useSsl, verifyPeer, startTls, clientResources, clientOptions,
-					timeout, shutdownTimeout);
+					readFrom, timeout, shutdownTimeout);
 		}
 	}
 
